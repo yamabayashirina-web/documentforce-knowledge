@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIOCR定例MTG ナレッジサイト</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f9fa;color:#1a1a1a;min-height:100vh}
+.header{background:#fff;border-bottom:1px solid #e9ecef;padding:16px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.header-title{font-size:18px;font-weight:600;color:#1a1a1a}
+.container{max-width:860px;margin:0 auto;padding:24px 16px}
+.nav{display:flex;gap:4px;margin-bottom:24px;background:#fff;border:1px solid #e9ecef;border-radius:10px;padding:6px;flex-wrap:wrap}
+.nav-btn{padding:8px 16px;border-radius:7px;border:none;font-size:13px;cursor:pointer;background:transparent;color:#666;transition:all .15s;font-weight:500;display:flex;align-items:center;gap:6px}
+.nav-btn.active{background:#f0f4ff;color:#3451b2;font-weight:600}
+.nav-btn:hover:not(.active){background:#f5f5f5}
+.page{display:none}.page.active{display:block}
+.section-title{font-size:20px;font-weight:600;margin-bottom:16px;color:#1a1a1a}
+.card{background:#fff;border:1px solid #e9ecef;border-radius:10px;padding:16px 20px;margin-bottom:12px}
+.update-card{border-left:4px solid #1D9E75;border-radius:0 10px 10px 0;padding:14px 18px;margin-bottom:10px;background:#fff;border-top:1px solid #e9ecef;border-right:1px solid #e9ecef;border-bottom:1px solid #e9ecef}
+.badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600}
+.badge-new{background:#e8f5e9;color:#2e7d32}
+.badge-fix{background:#fce4ec;color:#c62828}
+.badge-up{background:#e3f2fd;color:#1565c0}
+.badge-info{background:#fff8e1;color:#e65100}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:#f0f0f0;color:#555;margin-right:4px;margin-bottom:2px}
+.meta{font-size:12px;color:#999;margin-bottom:6px}
+.empty{text-align:center;padding:48px 24px;color:#999;font-size:14px}
+.empty i{font-size:32px;display:block;margin-bottom:12px;opacity:0.4}
+.faq-q{font-weight:600;font-size:14px;margin-bottom:6px;color:#1a1a1a}
+.faq-a{font-size:13px;color:#555;line-height:1.75}
+.minutes-body{font-size:13px;line-height:1.8;white-space:pre-wrap;color:#555}
+.expand-btn{font-size:12px;color:#3451b2;cursor:pointer;background:none;border:none;padding:0;margin-top:6px;display:block}
+</style>
+</head>
+<body>
+<div class="header">
+  <i class="ti ti-file-text" style="font-size:22px;color:#3451b2"></i>
+  <span class="header-title">AIOCR定例MTG ナレッジサイト</span>
+</div>
+<div class="container">
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showPage('updates',this)"><i class="ti ti-sparkles"></i> 最新アップデート</button>
+    <button class="nav-btn" onclick="showPage('minutes',this)"><i class="ti ti-notebook"></i> 議事録</button>
+    <button class="nav-btn" onclick="showPage('faq',this)"><i class="ti ti-help-circle"></i> FAQ詳細</button>
+  </nav>
+  <div id="page-updates" class="page active">
+    <div class="section-title">最新アップデート情報</div>
+    <div id="updates-list"></div>
+  </div>
+  <div id="page-minutes" class="page">
+    <div class="section-title">議事録アーカイブ</div>
+    <div id="minutes-list"></div>
+  </div>
+  <div id="page-faq" class="page">
+    <div class="section-title">FAQ詳細</div>
+    <div id="faq-list"></div>
+  </div>
+</div>
+<script>
+var DATA = {
+  "updates": [
+    {
+      "type": "新機能",
+      "title": "クレジット制限設定機能の追加",
+      "body": "ワークスペースごとのクレジット使用量や期間を制限できる機能が追加されました。予算管理や均等なクレジット利用が可能となり、スタンダードプラン以上の複数ワークスペース利用顧客に有効です。",
+      "date": "2026-06-10",
+      "source": "AIOCR定例MTG 2026-06-10"
+    },
+    {
+      "type": "新機能",
+      "title": "ドキュメントタイプビルダー：既存タイプへの解析項目自動作成",
+      "body": "既存のドキュメントタイプに対して解析項目を自動作成できる機能が追加されました。新規作成時だけでなく、既存タイプへの後付け追加も効率化されます。",
+      "date": "2026-06-10",
+      "source": "AIOCR定例MTG 2026-06-10"
+    },
+    {
+      "type": "改善",
+      "title": "解析情報表示の刷新",
+      "body": "ドキュメント詳細画面のビューが改善され、合計解析時間・アップロードから解析完了までの詳細タイミングが確認できるようになりました。大規模データ処理時の目安が把握しやすくなっています。",
+      "date": "2026-06-10",
+      "source": "AIOCR定例MTG 2026-06-10"
+    },
+    {
+      "type": "新機能",
+      "title": "全分抽出スキップオプションの追加",
+      "body": "ファイル解析のみを行う場合に全分抽出処理をスキップできるオプションが追加されました。テキスト情報を使用しない解析において処理スピード向上とコスト低減が実現されます。検索機能が必要な顧客向けには従来通り全分抽出を必ず実行する設定も維持されています。",
+      "date": "2026-06-10",
+      "source": "AIOCR定例MTG 2026-06-10"
+    },
+    {
+      "type": "改善",
+      "title": "プロンプト変更履歴・復元機能の強化",
+      "body": "解析項目設定においてプロンプトの変更履歴確認・復元が可能になりました。保存件数が20件から100件に拡大され、以前のプロンプトへの柔軟な巻き戻しが可能です。",
+      "date": "2026-06-10",
+      "source": "AIOCR定例MTG 2026-06-10"
+    },
+    {
+      "type": "新機能",
+      "title": "解析項目の一括削除機能",
+      "body": "複数の解析項目を一度に選択して削除できる一括操作機能が追加されました。不要な項目整理の作業負担が軽減されます。",
+      "date": "2026-06-10",
+      "source": "AIOCR定例MTG 2026-06-10"
+    },
+    {
+      "type": "お知らせ",
+      "title": "ハイライト機能の開発計画",
+      "body": "書類上の該当箇所を特定するハイライト機能の開発が計画されています。6月〜7月のリリースを目指しており、顧客が情報を見つけやすくなり商談時の回答にも活用が見込まれます。",
+      "date": "2026-06-10",
+      "source": "AIOCR定例MTG 2026-06-10"
+    }
+  ],
+  "minutes": [
+    {
+      "date": "2026-06-10",
+      "title": "AIOCR定例MTG 2026-06-10",
+      "body": "【新入社員の歓迎】\n昨年10月入社の堀バレリヤさんが紹介されました。今後インドネシア方面のサポートを担当します。\n\n【Excel見積もり帳票の不具合調査】\nアルテック様の見積もり書読み取りでExcelテンプレートへの転記が失敗する事象が報告されました。和泉駿佑さんはExcel側の画像データ管理仕様や循環参照が原因の可能性が高いと判断し、個別調査を実施します。\n\n【顧客フィードバックと言語対応】\nファイルアップロード制限の改善やAIプロンプトチャット機能が顧客から高評価を得ています。一方、AIチャットのメニューが日本語のままになっている問題が判明し、開発側で早急に修正を行います。\n\n【チェックボックス認識精度の課題】\n現行ドキュメントフォースのチェックボックス認識精度が低いことが共有されました。鳥取生協様の事例より、AIがチェックボックスを直接認識するのではなく前後の文脈・統計情報から推測している傾向が判明しました。\n\n【ファイル解析手法と精度の関係】\nチェックボックス認識精度向上にはJPEG/PNG形式がPDFより適していることが議論されました。PDFはテキスト解析優先となりチェックボックスが無視される一因となるため、ファイル形式の検討が進められています。\n\n【介護業界の潜在需要】\n介護施設での手書きチェックボックス書類の入力業務を自動化できれば、介護業界全体への大きな展開が見込めると入田浩史さんが指摘しました。\n\n【会議録の活用と社内FAQ構築】\n会議録をAIに学習させ社内FAQを自動生成する仕組みの構築が提案されました。同様エラー発生時に過去事例を即座に参照できるようになり、サポートコスト削減が期待されます。和泉駿佑さんが過去の会議録を共有する予定です。\n\n【6月アップデート内容】\n・クレジット制限設定機能\n・ドキュメントタイプビルダーへの解析項目自動作成機能\n・解析情報表示の刷新（合計解析時間・詳細タイミング確認）\n・全分抽出スキップオプション\n・プロンプト変更履歴・復元機能（20件→100件に拡大）\n・解析項目一括削除機能\n・ハイライト機能（6〜7月リリース予定）"
+    }
+  ],
+  "faqs": [
+    {
+      "q": "Excelテンプレートへの転記時にエラーが発生します。どうすればよいですか？",
+      "a": "Excel側の画像データ管理仕様や循環参照が原因となっている可能性が高いです。まずExcelファイル内の循環参照（数式が自分自身を参照していないか）を確認してください。また、埋め込み画像が多い場合はファイルサイズや仕様の問題も考えられます。個別に調査が必要な場合はサポートへお問い合わせください。",
+      "tags": [
+        "Excel",
+        "エラー",
+        "テンプレート",
+        "転記"
+      ],
+      "source": "AIOCR定例MTG 2026-06-10"
+    },
+    {
+      "q": "チェックボックスが正しく認識されません。精度を上げるにはどうすればよいですか？",
+      "a": "現状、PDFファイルではテキスト解析が優先されるためチェックボックスが無視されるケースがあります。精度向上のためにはJPEGまたはPNG形式の画像ファイルとしてアップロードすることをお試しください。なお、チェックボックス認識の根本的な改善は現在社内で検証中です。",
+      "tags": [
+        "チェックボックス",
+        "認識精度",
+        "PDF",
+        "画像",
+        "JPEG"
+      ],
+      "source": "AIOCR定例MTG 2026-06-10"
+    },
+    {
+      "q": "AIチャットのメニューが英語のまま表示されます。",
+      "a": "開発側の確認漏れにより英語表示が残っている箇所が判明しています。現在修正対応中です。改善まで今しばらくお待ちください。",
+      "tags": [
+        "多言語",
+        "英語",
+        "AIチャット",
+        "表示"
+      ],
+      "source": "AIOCR定例MTG 2026-06-10"
+    },
+    {
+      "q": "クレジット制限機能はどのように使いますか？",
+      "a": "ワークスペース設定からクレジット使用量の上限と制限期間を設定できます。スタンダードプラン以上で複数ワークスペースを利用している場合に特に有効です。部署ごとの予算管理や均等なクレジット配分が可能になります。設定方法の詳細はサポートへお問い合わせください。",
+      "tags": [
+        "クレジット",
+        "予算管理",
+        "ワークスペース",
+        "制限"
+      ],
+      "source": "AIOCR定例MTG 2026-06-10"
+    },
+    {
+      "q": "プロンプトを以前の状態に戻したいのですがどうすればよいですか？",
+      "a": "解析項目設定画面にプロンプト変更履歴機能が追加されました。最大100件（旧：20件）の変更履歴が保存されており、任意の時点のプロンプトを選択して復元することができます。",
+      "tags": [
+        "プロンプト",
+        "履歴",
+        "復元",
+        "解析項目"
+      ],
+      "source": "AIOCR定例MTG 2026-06-10"
+    }
+  ]
+};
+function showPage(p,btn){document.querySelectorAll('.page').forEach(function(el){el.classList.remove('active')});document.querySelectorAll('.nav-btn').forEach(function(el){el.classList.remove('active')});document.getElementById('page-'+p).classList.add('active');if(btn)btn.classList.add('active');}
+function badgeClass(t){if(t==='新機能')return 'badge-new';if(t==='改善')return 'badge-up';if(t==='修正')return 'badge-fix';return 'badge-info';}
+function renderAll(){
+  var uel=document.getElementById('updates-list');
+  if(!DATA.updates.length){uel.innerHTML='<div class="empty"><i class="ti ti-database-off"></i>まだ登録されていません。</div>';}
+  else{uel.innerHTML=DATA.updates.map(function(u){return '<div class="update-card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="badge '+badgeClass(u.type)+'">'+u.type+'</span><span style="font-size:12px;color:#999">'+u.date+'</span><span class="tag">'+u.source+'</span></div><div style="font-size:15px;font-weight:600;margin-bottom:4px">'+u.title+'</div><div style="font-size:13px;color:#555;line-height:1.7">'+u.body+'</div></div>';}).join('');}
+  var mel=document.getElementById('minutes-list');
+  if(!DATA.minutes.length){mel.innerHTML='<div class="empty"><i class="ti ti-notebook-off"></i>まだ議事録がありません。</div>';}
+  else{mel.innerHTML=DATA.minutes.map(function(m,i){var preview=m.body.length>200?m.body.substring(0,200)+'…':m.body;var more=m.body.length>200?'<button class="expand-btn" onclick="toggleMin('+i+')">全文を見る ▼</button>':'';return '<div class="card"><div class="meta">'+m.date+'</div><div style="font-size:15px;font-weight:600;margin-bottom:10px">'+m.title+'</div><div class="minutes-body" id="mb-'+i+'">'+preview+'</div>'+more+'</div>';}).join('');}
+  var fel=document.getElementById('faq-list');
+  if(!DATA.faqs.length){fel.innerHTML='<div class="empty"><i class="ti ti-help-off"></i>まだFAQがありません。</div>';}
+  else{fel.innerHTML=DATA.faqs.map(function(f){return '<div class="card"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'+(f.tags||[]).map(function(t){return '<span class="tag">'+t+'</span>';}).join('')+'<span style="font-size:11px;color:#bbb">'+(f.source||'')+'</span></div><div class="faq-q">'+f.q+'</div><div class="faq-a">'+f.a+'</div></div>';}).join('');}
+}
+function toggleMin(i){var el=document.getElementById('mb-'+i);var btn=el.nextElementSibling;if(!btn)return;if(btn.textContent.includes('▼')){el.textContent=DATA.minutes[i].body;btn.textContent='閉じる ▲';}else{el.textContent=DATA.minutes[i].body.substring(0,200)+'…';btn.textContent='全文を見る ▼';}}
+renderAll();
+</script>
+</body>
+</html>
