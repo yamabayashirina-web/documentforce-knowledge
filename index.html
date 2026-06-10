@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIOCR定例MTG ナレッジサイト</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f9fa;color:#1a1a1a;min-height:100vh}
+.header{background:#fff;border-bottom:1px solid #e9ecef;padding:16px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.header-title{font-size:18px;font-weight:600;color:#1a1a1a}
+.container{max-width:860px;margin:0 auto;padding:24px 16px}
+.nav{display:flex;gap:4px;margin-bottom:24px;background:#fff;border:1px solid #e9ecef;border-radius:10px;padding:6px;flex-wrap:wrap}
+.nav-btn{padding:8px 16px;border-radius:7px;border:none;font-size:13px;cursor:pointer;background:transparent;color:#666;transition:all .15s;font-weight:500;display:flex;align-items:center;gap:6px}
+.nav-btn.active{background:#f0f4ff;color:#3451b2;font-weight:600}
+.nav-btn:hover:not(.active){background:#f5f5f5}
+.page{display:none}.page.active{display:block}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:10px}
+.section-title{font-size:20px;font-weight:600;color:#1a1a1a}
+.search-box{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #ddd;border-radius:8px;padding:8px 12px;min-width:200px;flex:1;max-width:280px}
+.search-box i{color:#999;font-size:16px;flex-shrink:0}
+.search-box input{border:none;outline:none;font-size:13px;color:#1a1a1a;background:transparent;width:100%}
+.search-box input::placeholder{color:#bbb}
+.filter-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.filter-label{font-size:12px;color:#999;margin-right:2px}
+.filter-btn{padding:4px 12px;border-radius:20px;border:1px solid #ddd;background:#fff;font-size:12px;cursor:pointer;color:#555;transition:all .15s;font-weight:500}
+.filter-btn:hover{border-color:#3451b2;color:#3451b2}
+.filter-btn.active{border-color:transparent;color:#fff;font-weight:600}
+.filter-btn.all.active{background:#3451b2}
+.filter-btn.new.active{background:#2e7d32}
+.filter-btn.up.active{background:#1565c0}
+.filter-btn.fix.active{background:#c62828}
+.filter-btn.info.active{background:#e65100}
+.search-count{font-size:12px;color:#999;margin-bottom:12px}
+.card{background:#fff;border:1px solid #e9ecef;border-radius:10px;padding:16px 20px;margin-bottom:12px}
+.update-card{border-left:4px solid #1D9E75;border-radius:0 10px 10px 0;padding:14px 18px;margin-bottom:10px;background:#fff;border-top:1px solid #e9ecef;border-right:1px solid #e9ecef;border-bottom:1px solid #e9ecef}
+.badge{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600}
+.badge-new{background:#e8f5e9;color:#2e7d32}
+.badge-fix{background:#fce4ec;color:#c62828}
+.badge-up{background:#e3f2fd;color:#1565c0}
+.badge-info{background:#fff8e1;color:#e65100}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:#f0f0f0;color:#555;margin-right:4px;margin-bottom:2px}
+.meta{font-size:12px;color:#999;margin-bottom:6px}
+.empty{text-align:center;padding:48px 24px;color:#999;font-size:14px}
+.empty i{font-size:32px;display:block;margin-bottom:12px;opacity:0.4}
+.faq-q{font-weight:600;font-size:14px;margin-bottom:6px;color:#1a1a1a}
+.faq-a{font-size:13px;color:#555;line-height:1.75}
+.minutes-body{font-size:13px;line-height:1.8;white-space:pre-wrap;color:#555}
+.expand-btn{font-size:12px;color:#3451b2;cursor:pointer;background:none;border:none;padding:0;margin-top:6px;display:block}
+.highlight{background:#fff3cd;border-radius:2px;padding:0 2px}
+</style>
+</head>
+<body>
+<div class="header">
+  <i class="ti ti-file-text" style="font-size:22px;color:#3451b2"></i>
+  <span class="header-title">AIOCR定例MTG ナレッジサイト</span>
+</div>
+<div class="container">
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showPage('updates',this)"><i class="ti ti-sparkles"></i> 最新アップデート</button>
+    <button class="nav-btn" onclick="showPage('minutes',this)"><i class="ti ti-notebook"></i> 議事録</button>
+    <button class="nav-btn" onclick="showPage('faq',this)"><i class="ti ti-help-circle"></i> FAQ詳細</button>
+  </nav>
+  <div id="page-updates" class="page active">
+    <div class="section-header">
+      <div class="section-title">最新アップデート情報</div>
+      <div class="search-box"><i class="ti ti-search"></i><input type="text" id="search-updates" placeholder="キーワードで検索..." oninput="renderUpdates()"></div>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-label"><i class="ti ti-filter" style="font-size:12px;vertical-align:-1px"></i> 絞り込み：</span>
+      <button class="filter-btn all active" onclick="setFilter('all',this)">すべて</button>
+      <button class="filter-btn new" onclick="setFilter('新機能',this)">新機能</button>
+      <button class="filter-btn up" onclick="setFilter('改善',this)">改善</button>
+      <button class="filter-btn fix" onclick="setFilter('修正',this)">修正</button>
+      <button class="filter-btn info" onclick="setFilter('お知らせ',this)">お知らせ</button>
+    </div>
+    <div id="search-count-updates" class="search-count"></div>
+    <div id="updates-list"></div>
+  </div>
+  <div id="page-minutes" class="page">
+    <div class="section-header">
+      <div class="section-title">議事録アーカイブ</div>
+      <div class="search-box"><i class="ti ti-search"></i><input type="text" id="search-minutes" placeholder="キーワードで検索..." oninput="renderMinutes()"></div>
+    </div>
+    <div id="search-count-minutes" class="search-count"></div>
+    <div id="minutes-list"></div>
+  </div>
+  <div id="page-faq" class="page">
+    <div class="section-header">
+      <div class="section-title">FAQ詳細</div>
+      <div class="search-box"><i class="ti ti-search"></i><input type="text" id="search-faq" placeholder="キーワードで検索..." oninput="renderFaqs()"></div>
+    </div>
+    <div id="search-count-faq" class="search-count"></div>
+    <div id="faq-list"></div>
+  </div>
+</div>
+<script>
+var DATA={
+  updates:[
+    {"type":"新機能","title":"クレジット制限設定機能の追加","body":"ワークスペースごとのクレジット使用量や利用期間を制限できる機能が6月のアップデートで追加されました。予算管理や均等なクレジット利用が可能になり、スタンダードプラン以上で複数ワークスペースを利用する顧客に特に有効です。","date":"2026-06-10","source":"製品機能アップデート定例MTG"},
+    {"type":"新機能","title":"解析項目の自動作成機能（既存ドキュメントタイプ対応）","body":"既存のドキュメントタイプに対して解析項目を自動作成できる機能が追加されました。新規作成時だけでなく、既存タイプへの後付けでの項目追加も効率的に行えるようになりました。","date":"2026-06-10","source":"製品機能アップデート定例MTG"},
+    {"type":"改善","title":"解析情報表示の刷新（合計解析時間・詳細タイミング表示）","body":"ドキュメント詳細画面が改善され、合計解析時間やアップロードから解析完了までの詳細なタイミングを確認できるようになりました。大規模データ処理時の目安が把握しやすくなっています。","date":"2026-06-10","source":"製品機能アップデート定例MTG"},
+    {"type":"新機能","title":"全分抽出スキップオプションの追加","body":"ファイル解析のみを行う場合に全分抽出処理をスキップできるオプションが追加されました。テキスト情報を使用しない解析で処理スピードの向上とコスト低減が実現されます。検索機能利用者向けには全分抽出を必ず実行する設定も維持されています。","date":"2026-06-10","source":"製品機能アップデート定例MTG"},
+    {"type":"改善","title":"プロンプト変更履歴・復元機能の強化","body":"解析項目設定においてプロンプトの変更履歴の確認・復元が可能になりました。保存件数が従来の20件から100件に拡大され、以前のプロンプトへの柔軟な復元ができます。","date":"2026-06-10","source":"製品機能アップデート定例MTG"},
+    {"type":"新機能","title":"解析項目の一括削除機能","body":"解析項目を複数選択して一度に削除できる一括操作機能が追加されました。不要な項目を整理する際の作業負担が大幅に軽減されます。","date":"2026-06-10","source":"製品機能アップデート定例MTG"},
+    {"type":"お知らせ","title":"ハイライト機能の開発計画（6〜7月リリース予定）","body":"書類上の該当箇所を特定するハイライト機能の開発が進行中です。6月〜7月のリリースを目標としており、顧客が情報を見つけやすくなるため商談時の訴求ポイントとしても活用が見込まれます。","date":"2026-06-10","source":"製品機能アップデート定例MTG"},
+    {"type":"修正","title":"AIチャットメニューの日本語化対応","body":"AIプロンプトチャット機能のメニューが英語のまま表示される不具合が報告されました。開発側での確認漏れと認め、早急に修正対応を行う予定です。","date":"2026-06-10","source":"製品機能アップデート定例MTG"}
+  ],
+  minutes:[
+    {"date":"2026-06-10","title":"製品機能アップデート定例MTG（チェックボックス精度・新機能紹介）","body":"【概要】製品機能の改善報告とチェックボックス認識精度の課題共有を行い、今後の開発方針を決定。\n\n【自己紹介・新入社員歓迎】新たにチームに加わった堀バレリヤさんが紹介。昨年10月入社で今後インドネシア方面のサポートを担当予定。\n\n【Excel見積もり帳票の不具合調査】森藤浩子さんよりアルテック様の見積もり書読み取りにおいてExcelテンプレートへの転記がうまくいかないとの報告。ダウンロード時のエラーについて、和泉駿佑さんがExcel側の画像データ管理仕様や循環参照が原因の可能性が高いと判断し個別調査を実施することに。\n\n【顧客フィードバックと言語対応】堀バレリヤさんより、ファイルアップロード制限の改善やAIプロンプトチャット機能が顧客から高評価を得ているとの報告。一方でAIチャットメニューが日本語のままという問題が指摘され、早急な修正を約束。\n\n【チェックボックス認識精度の課題】現行システムでのチェックボックス認識精度が低いという課題を共有。鳥取生協様の事例を参考に、AIがチェックボックス自体を直接認識せず前後の文脈や統計情報から推測して回答している傾向があることが判明。\n\n【ファイル解析手法と精度の関係】チェックボックス認識精度向上にはJPEG・PNG等の画像ファイルがPDFより適していることを議論。PDFではテキスト解析が優先される傾向があり、チェックボックスが無視される一因となっているため、ファイル形式の検討を継続。\n\n【介護業界の潜在需要】入田浩史さんより、介護施設では手書きチェックボックスを含む書類入力が手作業で行われており、この課題解決により介護業界全体への大きな展開が見込めると指摘。\n\n【社内FAQの構築提案】入田浩史さんより、会議録をAIに学習させ社内FAQを自動生成する仕組みの構築を提案。同様エラー発生時に過去事例を即座に参照できるようにすることでサポートコスト削減が期待される。\n\n【新機能紹介】クレジット制限設定機能、解析項目自動作成機能、解析情報表示の刷新、全分抽出スキップオプション、プロンプト変更履歴機能（100件保存）、解析項目一括削除機能を紹介。ハイライト機能は6〜7月リリース予定。\n\n【ネクストアクション】\n- [和泉駿佑] Excelテンプレート変数書き込みエラーの原因分析・回答\n- [和泉駿佑] 英語表示箇所排除のためのテスト基準策定\n- [和泉駿佑] 手書きチェックボックス認識の裏側処理最適化・検証\n- [和泉駿佑] 過去の全会議記録をメンバーへ共有\n- [全員] クレジット制限設定機能を使った予算管理方法を顧客に案内\n- [全員] 外部ファイル絞り込み機能・クレジット制限機能の顧客案内\n- [全員] 解析項目自動作成機能の活用促進\n- [全員] 解析情報画面の新レイアウト確認\n- [全員] プロンプト変更履歴機能の活用\n- [全員] 解析項目一括削除機能の活用"}
+  ],
+  faqs:[
+    {"q":"ExcelテンプレートへのOCR結果転記でダウンロードエラーが発生します。原因は何ですか？","a":"Excel側の画像データ管理仕様や循環参照が原因である可能性が高いです。具体的には、(1) Excelファイル内に埋め込まれた画像が特定の仕様で管理されている場合に書き込み処理が失敗することがあります。(2) セル間の循環参照が存在するとテンプレート変数の書き込み時にエラーが発生することがあります。対処法：Excelテンプレートから画像を除去またはリンク形式に変更する、循環参照を解消する、などをお試しください。詳細は開発チーム（和泉）に個別調査を依頼してください。","tags":["Excel","エラー","テンプレート","転記"],"source":"製品機能アップデート定例MTG"},
+    {"q":"AIプロンプトチャット機能のメニューが英語で表示されます。","a":"日本語化の対応漏れが確認されており、開発チームで早急に修正を進めています。現時点では英語表示のままご利用ください。修正リリース後にお知らせします。なお、他にも英語表示のままの箇所がある場合はサポートまでご連絡ください。","tags":["多言語","日本語化","UIバグ"],"source":"製品機能アップデート定例MTG"},
+    {"q":"チェックボックスの認識精度が低いのですが、改善方法はありますか？","a":"現行システムではチェックボックスをPDFで入力するとテキスト解析が優先され、チェックボックス自体が直接認識されにくい仕様になっています。以下の対処法をお試しください：\n(1) ファイル形式をPDFではなくJPEGまたはPNG画像として入力する → 画像解析モードになりチェックボックスを視覚的に認識しやすくなります。\n(2) スキャン解像度を上げる（300dpi以上推奨）。\n(3) 手書きの場合はチェックマークをはっきりと記載する。\n現在、認識精度向上のための処理最適化を社内で検証中です。改善リリースまでは画像ファイル形式での入力をお試しください。","tags":["チェックボックス","認識精度","PDF","画像","手書き"],"source":"製品機能アップデート定例MTG"},
+    {"q":"クレジット制限設定機能はどのプランで使えますか？","a":"クレジット制限設定機能はスタンダードプラン以上でご利用いただけます。ワークスペースごとにクレジット使用量の上限や期間を設定できるため、複数ワークスペースを運用している場合の予算管理に特に有効です。設定方法：ワークスペース設定 → クレジット管理 → 制限設定から上限値と期間を指定してください。","tags":["クレジット","予算管理","ワークスペース","プラン"],"source":"製品機能アップデート定例MTG"},
+    {"q":"既存のドキュメントタイプに解析項目を追加する効率的な方法はありますか？","a":"6月のアップデートで追加された「解析項目自動作成機能」をご利用ください。既存ドキュメントタイプを開き、「解析項目を自動作成」ボタンをクリックすることで、ドキュメントの内容に基づいて解析項目が自動提案されます。新規作成時だけでなく、既存タイプへの後付け追加にも対応しています。","tags":["解析項目","自動作成","ドキュメントタイプ"],"source":"製品機能アップデート定例MTG"},
+    {"q":"プロンプトを以前のバージョンに戻したいのですが、どうすればよいですか？","a":"プロンプト変更履歴機能をご利用ください。解析項目の設定画面で「履歴」ボタンをクリックすると、過去100件分のプロンプト変更履歴が確認できます。復元したいバージョンを選択して「このプロンプトを復元」をクリックしてください。（従来は20件まででしたが、6月のアップデートで100件に拡張されました。）","tags":["プロンプト","履歴","復元","バージョン管理"],"source":"製品機能アップデート定例MTG"}
+  ]
+};
+var currentFilter='all';
+function showPage(p,btn){document.querySelectorAll('.page').forEach(function(el){el.classList.remove('active')});document.querySelectorAll('.nav-btn').forEach(function(el){el.classList.remove('active')});document.getElementById('page-'+p).classList.add('active');if(btn)btn.classList.add('active');}
+function setFilter(type,btn){currentFilter=type;document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});btn.classList.add('active');renderUpdates();}
+function badgeClass(t){if(t==='新機能')return 'badge-new';if(t==='改善')return 'badge-up';if(t==='修正')return 'badge-fix';return 'badge-info';}
+function esc(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function highlight(text,kw){if(!kw)return esc(text);var escaped=esc(text);var escapedKw=kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return escaped.replace(new RegExp('('+escapedKw+')','gi'),'<span class="highlight">$1</span>');}
+function matches(item,kw){if(!kw)return true;return JSON.stringify(item).toLowerCase().indexOf(kw.toLowerCase())!==-1;}
+function renderUpdates(){var kw=document.getElementById('search-updates').value.trim();var el=document.getElementById('updates-list');var countEl=document.getElementById('search-count-updates');var filtered=DATA.updates.filter(function(u){return(currentFilter==='all'||u.type===currentFilter)&&matches(u,kw);});var msg='';if(kw||currentFilter!=='all'){msg=filtered.length+'件 表示中';if(currentFilter!=='all')msg+='（'+currentFilter+'のみ）';}countEl.textContent=msg;if(!filtered.length){el.innerHTML='<div class="empty"><i class="ti ti-database-off"></i>'+(kw||currentFilter!=='all'?'条件に一致するアップデートはありません。':'まだ登録されていません。')+'</div>';return;}el.innerHTML=filtered.map(function(u){return '<div class="update-card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span class="badge '+badgeClass(u.type)+'">'+esc(u.type)+'</span><span style="font-size:12px;color:#999">'+esc(u.date)+'</span><span class="tag">'+esc(u.source)+'</span></div><div style="font-size:15px;font-weight:600;margin-bottom:4px">'+highlight(u.title,kw)+'</div><div style="font-size:13px;color:#555;line-height:1.7">'+highlight(u.body,kw)+'</div></div>';}).join('');}
+function renderMinutes(){var kw=document.getElementById('search-minutes').value.trim();var el=document.getElementById('minutes-list');var countEl=document.getElementById('search-count-minutes');var filtered=DATA.minutes.filter(function(m){return matches(m,kw);});countEl.textContent=kw?filtered.length+'件 表示中':'';if(!filtered.length){el.innerHTML='<div class="empty"><i class="ti ti-notebook-off"></i>'+(kw?'「'+esc(kw)+'」に一致する議事録はありません。':'まだ議事録がありません。')+'</div>';return;}el.innerHTML=filtered.map(function(m,i){var preview=m.body.length>200?m.body.substring(0,200)+'…':m.body;var more=m.body.length>200?'<button class="expand-btn" onclick="toggleMin('+i+',\''+encodeURIComponent(m.body)+'\')">全文を見る ▼</button>':'';return '<div class="card"><div class="meta">'+esc(m.date)+'</div><div style="font-size:15px;font-weight:600;margin-bottom:10px">'+highlight(m.title,kw)+'</div><div class="minutes-body" id="mb-'+i+'">'+highlight(preview,kw)+'</div>'+more+'</div>';}).join('');}
+function renderFaqs(){var kw=document.getElementById('search-faq').value.trim();var el=document.getElementById('faq-list');var countEl=document.getElementById('search-count-faq');var filtered=DATA.faqs.filter(function(f){return matches(f,kw);});countEl.textContent=kw?filtered.length+'件 表示中':'';if(!filtered.length){el.innerHTML='<div class="empty"><i class="ti ti-help-off"></i>'+(kw?'「'+esc(kw)+'」に一致するFAQはありません。':'まだFAQがありません。')+'</div>';return;}el.innerHTML=filtered.map(function(f){return '<div class="card"><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">'+(f.tags||[]).map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join('')+'<span style="font-size:11px;color:#bbb">'+esc(f.source||'')+'</span></div><div class="faq-q">'+highlight(f.q,kw)+'</div><div class="faq-a">'+highlight(f.a,kw)+'</div></div>';}).join('');}
+function toggleMin(i,encoded){var el=document.getElementById('mb-'+i);var btn=el.nextElementSibling;if(!btn)return;if(btn.textContent.includes('▼')){el.textContent=decodeURIComponent(encoded);btn.textContent='閉じる ▲';}else{el.textContent=decodeURIComponent(encoded).substring(0,200)+'…';btn.textContent='全文を見る ▼';}}
+renderUpdates();renderMinutes();renderFaqs();
+</script>
+</body>
+</html>
